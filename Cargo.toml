@@ -1,0 +1,14 @@
+[workspace]
+members = [
+  "netcom",
+  "netcom-macros"
+]
+resolver = "2"
+
+[workspace.dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = "2.0"
+netcom-macros = { path = "netcom-macros" }
+netcom = { path = "netcom" }
+
