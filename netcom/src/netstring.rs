@@ -1,8 +1,21 @@
+use std::fmt;
+
 #[derive(Debug, PartialEq)]
 pub enum NetstringError {
     Incomplete,
     Malformed,
 }
+
+impl fmt::Display for NetstringError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            NetstringError::Incomplete => write!(f, "Incomplete netstring"),
+            NetstringError::Malformed => write!(f, "Malformed netstring"),
+        }
+    }
+}
+
+impl std::error::Error for NetstringError {}
 
 pub fn parse_netstring(buf: &[u8]) -> Result<&[u8], NetstringError> {
     if buf.len() < 3 {

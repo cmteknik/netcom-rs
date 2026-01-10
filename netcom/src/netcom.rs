@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::str::{self, Utf8Error};
@@ -20,6 +21,23 @@ pub enum NetcomError {
     Utf8Error(Utf8Error),
     ResponseError(String),
 }
+
+impl fmt::Display for NetcomError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            NetcomError::NotConnected => write!(f, "{}", "Not Connected"),
+            NetcomError::StreamError(err) => write!(f, "Stream error: {}", err),
+            NetcomError::NetstringError(err) => {
+                write!(f, "Netstring error: {}", err)
+            }
+            NetcomError::JsonError(err) => write!(f, "JSON error: {}", err),
+            NetcomError::Utf8Error(err) => write!(f, "UTF8 error: {}", err),
+            NetcomError::ResponseError(err) => write!(f, "Response error: {}", err),
+        }
+    }
+}
+
+impl std::error::Error for NetcomError {}
 
 pub struct NetcomClient {
     hostname: String,
