@@ -88,3 +88,11 @@ pub struct WriteResponseDto {
     pub result: HashMap<String, Option<f64>>,
     // pub errors: Option<HashMap<String, String>>,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct ErrorResponseDto {
+    pub error: String,
+
+    #[allow(dead_code)]
+    pub message: Option<String>,
+}

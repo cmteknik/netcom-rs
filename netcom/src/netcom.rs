@@ -7,7 +7,7 @@ pub use netcom_macros::NetcomMap;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use crate::dto::{RdValueDto, ReadRequestDto};
+use crate::dto::{ErrorResponseDto, RdValueDto, ReadRequestDto};
 use crate::netstring::NetstringError;
 
 pub const DEFAULT_PORT: u16 = 7878;
@@ -20,6 +20,7 @@ pub enum NetcomError {
     JsonError(serde_json::Error),
     Utf8Error(Utf8Error),
     ResponseError(String),
+    DeviceNotFound,
 }
 
 impl fmt::Display for NetcomError {
@@ -33,6 +34,7 @@ impl fmt::Display for NetcomError {
             NetcomError::JsonError(err) => write!(f, "JSON error: {}", err),
             NetcomError::Utf8Error(err) => write!(f, "UTF8 error: {}", err),
             NetcomError::ResponseError(err) => write!(f, "Response error: {}", err),
+            NetcomError::DeviceNotFound => write!(f, "Device not found"),
         }
     }
 }
@@ -72,7 +74,13 @@ where
     match std::str::from_utf8(data) {
         Ok(s) => match serde_json::from_str(&s) {
             Ok(r) => Ok(r),
-            Err(e) => Err(NetcomError::JsonError(e)),
+            Err(e) => match serde_json::from_str::<ErrorResponseDto>(&s) {
+                Ok(error_response) => match error_response.error.as_str() {
+                    "notfound" => Err(NetcomError::DeviceNotFound),
+                    _ => Err(NetcomError::JsonError(e)),
+                },
+                Err(_) => Err(NetcomError::JsonError(e)),
+            },
         },
         Err(e) => Err(NetcomError::Utf8Error(e)),
     }
